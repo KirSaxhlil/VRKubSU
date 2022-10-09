@@ -7,7 +7,8 @@
 AVRPawn::AVRPawn()
 	:
 	AxisDeadzone(0.7f),
-	SnapTurnAngle(-45.f)
+	SnapTurnAngle(-45.f),
+	TeleportTracing(false)
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -98,4 +99,18 @@ void AVRPawn::SnapTurn(bool RightTurn) {
 	AddActorWorldRotation(FRotator(0, 0, LocalYawDelta), false, NULL, ETeleportType::TeleportPhysics);
 	FVector NewLocation = (LocalCameraPosition - (LocalCameraRelativeTransform * LocalNewTransform).GetLocation()) + GetActorLocation();
 	SetActorLocation(NewLocation, false, NULL, ETeleportType::TeleportPhysics);
+}
+
+void AVRPawn::StartTeleportTrace() {
+	TeleportTracing = true;
+	FActorSpawnParameters SpawnParams = FActorSpawnParameters();
+	SpawnParams.Owner = this;
+	TeleportRingRef = GetWorld()->SpawnActor<ATeleportRing>(ATeleportRing::StaticClass(), FTransform(), SpawnParams);
+}
+
+void AVRPawn::EndTeleportTrace() {
+	TeleportTracing = false;
+	if (IsValid(TeleportRingRef)) {
+		TeleportRingRef->Destroy();
+	}
 }

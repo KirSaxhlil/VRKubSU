@@ -12,6 +12,8 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "HAL/IConsoleManager.h"
 
+#include "VRKubSU/Actors/Pawns/TeleportRing.h"
+
 #include "VRPawn.generated.h"
 
 UCLASS()
@@ -37,6 +39,8 @@ public:
 
 	float AxisDeadzone;
 	float SnapTurnAngle;
+	bool TeleportTracing;
+	ATeleportRing* TeleportRingRef;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -49,5 +53,9 @@ public:
 	void SnapTurn(bool RightTurn);
 
 	void InputAxis_Turn(float AxisValue);
+
+	void StartTeleportTrace();
+
+	void EndTeleportTrace();
 
 };
