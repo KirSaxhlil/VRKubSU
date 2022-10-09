@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
+#include "NiagaraComponent.h"
+
 #include "TeleportRing.generated.h"
 
 UCLASS()
@@ -20,6 +23,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	USceneComponent* DefaultSceneRoot;
+	UNiagaraComponent* NS_Ring;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
