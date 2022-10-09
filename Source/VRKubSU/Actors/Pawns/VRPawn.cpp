@@ -5,6 +5,9 @@
 
 // Sets default values
 AVRPawn::AVRPawn()
+	:
+	AxisDeadzone(0.7f),
+	SnapTurnAngle(-45.f)
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -36,6 +39,8 @@ AVRPawn::AVRPawn()
 	WI_Left->SetupAttachment(MC_Left);
 }
 
+////// BASIC EVENTS //////
+
 // Called when the game starts or when spawned
 void AVRPawn::BeginPlay()
 {
@@ -44,7 +49,6 @@ void AVRPawn::BeginPlay()
 		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::Floor);
 		IConsoleManager::Get().FindConsoleVariable(TEXT("vr.PixelDensity"))->Set(float(1.0));
 	}
-	
 }
 
 // Called every frame
@@ -54,10 +58,44 @@ void AVRPawn::Tick(float DeltaTime)
 
 }
 
+////// INPUTS //////
+
 // Called to bind functionality to input
 void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAxis("Turn", this, &AVRPawn::InputAxis_Turn);
 }
 
+void AVRPawn::InputAxis_Turn(float AxisValue)
+{
+	if ((Controller != NULL) && (AxisValue != 0.0f)) {
+		bool DoOnce = false;
+		if (IsAxisGreaterThenDeadzone(AxisValue)) {
+			if (DoOnce == false) {
+				DoOnce = true;
+				SnapTurn(AxisValue > 0.f);
+			}
+		}
+		else {
+			DoOnce = false;
+		}
+	}
+}
+
+////// FUNCTIONS //////
+
+bool AVRPawn::IsAxisGreaterThenDeadzone(float axis_value) {
+	return FMath::Abs(axis_value) >= AxisDeadzone;
+}
+
+void AVRPawn::SnapTurn(bool RightTurn) {
+	float LocalYawDelta = FMath::FloatSelect(FMath::Abs(SnapTurnAngle), SnapTurnAngle, RightTurn);
+	FVector LocalCameraPosition = Camera->GetComponentLocation();
+	FTransform LocalCameraRelativeTransform = Camera->GetRelativeTransform();
+	FTransform LocalNewTransform = FTransform(this->GetActorRotation().Add(0, 0, LocalYawDelta), this->GetActorLocation(), FVector(1, 1, 1));
+	AddActorWorldRotation(FRotator(0, 0, LocalYawDelta), false, NULL, ETeleportType::TeleportPhysics);
+	FVector NewLocation = (LocalCameraPosition - (LocalCameraRelativeTransform * LocalNewTransform).GetLocation()) + GetActorLocation();
+	SetActorLocation(NewLocation, false, NULL, ETeleportType::TeleportPhysics);
+}

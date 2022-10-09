@@ -35,10 +35,19 @@ public:
 	UWidgetInteractionComponent* WI_Right;
 	UWidgetInteractionComponent* WI_Left;
 
+	float AxisDeadzone;
+	float SnapTurnAngle;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	bool IsAxisGreaterThenDeadzone(float axis_value);
+
+	void SnapTurn(bool RightTurn);
+
+	void InputAxis_Turn(float AxisValue);
 
 };
