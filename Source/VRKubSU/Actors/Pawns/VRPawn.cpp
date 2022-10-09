@@ -40,6 +40,10 @@ AVRPawn::AVRPawn()
 void AVRPawn::BeginPlay()
 {
 	Super::BeginPlay();
+	if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled()) {
+		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::Floor);
+		IConsoleManager::Get().FindConsoleVariable(TEXT("vr.PixelDensity"))->Set(float(1.0));
+	}
 	
 }
 

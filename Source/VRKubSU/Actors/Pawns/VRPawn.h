@@ -4,9 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+
 #include "MotionControllerComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetInteractionComponent.h"
+
+#include "HeadMountedDisplayFunctionLibrary.h"
+#include "HAL/IConsoleManager.h"
+
 #include "VRPawn.generated.h"
 
 UCLASS()
