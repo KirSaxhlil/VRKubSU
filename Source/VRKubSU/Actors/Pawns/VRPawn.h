@@ -71,6 +71,8 @@ public:
 
 	void InputAxis_Turn(float AxisValue);
 
+	void InputAxis_Teleport(float AxisValue);
+
 	void StartTeleportTrace();
 
 	void EndTeleportTrace();

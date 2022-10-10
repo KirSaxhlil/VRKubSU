@@ -71,21 +71,43 @@ void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("Turn", this, &AVRPawn::InputAxis_Turn);
+	PlayerInputComponent->BindAxis("Turning", this, &AVRPawn::InputAxis_Turn);
+	PlayerInputComponent->BindAxis("Teleport", this, &AVRPawn::InputAxis_Teleport);
 }
 
 void AVRPawn::InputAxis_Turn(float AxisValue)
 {
-	if ((Controller != NULL) && (AxisValue != 0.0f)) {
+	if (Controller != NULL) {
 		bool DoOnce = false;
 		if (IsAxisGreaterThenDeadzone(AxisValue)) {
-			if (DoOnce == false) {
+			if (!DoOnce) {
 				DoOnce = true;
 				SnapTurn(AxisValue > 0.f);
 			}
 		}
 		else {
 			DoOnce = false;
+		}
+	}
+}
+
+void AVRPawn::InputAxis_Teleport(float AxisValue)
+{
+	if (Controller != NULL) {
+		bool DoOnce = false;
+		if (IsAxisGreaterThenDeadzone(AxisValue) && AxisValue > 0.f) {
+			if (!DoOnce) {
+				DoOnce = true;
+				StartTeleportTrace();
+			}
+			TeleportTrace(MC_Right->GetComponentLocation(), MC_Right->GetForwardVector());
+		}
+		else {
+			if (TeleportTracing) {
+				EndTeleportTrace();
+				TryTeleport();
+				DoOnce = false;
+			}
 		}
 	}
 }
