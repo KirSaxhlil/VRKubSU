@@ -108,6 +108,7 @@ void AVRPawn::SnapTurn(bool RightTurn) {
 
 void AVRPawn::StartTeleportTrace() {
 	TeleportTracing = true;
+	Tracer->SetVisibility(true);
 	FActorSpawnParameters SpawnParams = FActorSpawnParameters();
 	SpawnParams.Owner = this;
 	TeleportRingRef = GetWorld()->SpawnActor<ATeleportRing>(ATeleportRing::StaticClass(), FTransform(), SpawnParams);
@@ -118,6 +119,7 @@ void AVRPawn::EndTeleportTrace() {
 	if (IsValid(TeleportRingRef)) {
 		TeleportRingRef->Destroy();
 	}
+	Tracer->SetVisibility(false);
 }
 
 void AVRPawn::TeleportTrace(FVector Start, FVector ForwardVector) {
