@@ -8,13 +8,25 @@
 #include "MotionControllerComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetInteractionComponent.h"
+#include "NiagaraComponent.h"
 
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "HAL/IConsoleManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "NavigationSystem.h"
+#include "NiagaraDataInterfaceArrayFunctionLibrary.h"
 
 #include "VRKubSU/Actors/Pawns/TeleportRing.h"
 
 #include "VRPawn.generated.h"
+
+USTRUCT()
+struct FProjectedResult {
+	GENERATED_BODY()
+public:
+	FNavLocation ProjectedLocation;
+	bool Return;
+};
 
 UCLASS()
 class VRKUBSU_API AVRPawn : public APawn
@@ -36,11 +48,16 @@ public:
 	UCameraComponent* Camera;
 	UWidgetInteractionComponent* WI_Right;
 	UWidgetInteractionComponent* WI_Left;
+	UNiagaraComponent* Tracer;
+
 
 	float AxisDeadzone;
 	float SnapTurnAngle;
 	bool TeleportTracing;
+	bool ValidTeleportLocation;
 	ATeleportRing* TeleportRingRef;
+	TArray<FVector> TeleportTracePathPositions;
+	FVector ProjectedTeleportLocation;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -58,4 +75,7 @@ public:
 
 	void EndTeleportTrace();
 
+	void TeleportTrace(FVector Start, FVector ForwardVector);
+
+	FProjectedResult IsValidTeleportLocation(FHitResult Hit);
 };

@@ -8,7 +8,7 @@ AVRPawn::AVRPawn()
 	:
 	AxisDeadzone(0.7f),
 	SnapTurnAngle(-45.f),
-	TeleportTracing(false)
+	ProjectedTeleportLocation(FVector(0,0,0))
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -38,6 +38,11 @@ AVRPawn::AVRPawn()
 	WI_Left->PointerIndex = 0;
 	WI_Left->TraceChannel = ECollisionChannel::ECC_EngineTraceChannel1;
 	WI_Left->SetupAttachment(MC_Left);
+
+	Tracer = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Tracer"));
+	Tracer->SetAsset(ConstructorHelpers::FObjectFinder<UNiagaraSystem>(TEXT("/Game/Assets/VFX/NS_TeleportTrace.NS_TeleportTrace")).Object);
+	Tracer->SetVisibility(false);
+	Tracer->SetupAttachment(DefaultSceneRoot);
 }
 
 ////// BASIC EVENTS //////
@@ -113,4 +118,47 @@ void AVRPawn::EndTeleportTrace() {
 	if (IsValid(TeleportRingRef)) {
 		TeleportRingRef->Destroy();
 	}
+}
+
+void AVRPawn::TeleportTrace(FVector Start, FVector ForwardVector) {
+	float LocalTeleportLaunchSpeed = 650.f;
+	float LocalNavMeshCellHeight = 8.f;
+
+	FPredictProjectilePathParams PredictParams = FPredictProjectilePathParams();
+	PredictParams.StartLocation = Start;
+	PredictParams.LaunchVelocity = FVector(LocalTeleportLaunchSpeed) * ForwardVector;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>();
+	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery1);
+	PredictParams.ObjectTypes = ObjectTypes;
+	PredictParams.bTraceComplex = false;
+
+
+	FPredictProjectilePathResult PathResults;
+	UGameplayStatics::PredictProjectilePath(this, PredictParams, PathResults);
+
+	TeleportTracePathPositions = TArray<FVector>();
+	TeleportTracePathPositions.Add(Start);
+	for (FPredictProjectilePathPointData Point : PathResults.PathData) {
+		TeleportTracePathPositions.Add(Point.Location);
+	}
+	FProjectedResult Projected = IsValidTeleportLocation(PathResults.HitResult);
+	ProjectedTeleportLocation = FVector(Projected.ProjectedLocation.Location.X,
+										Projected.ProjectedLocation.Location.Y,
+										Projected.ProjectedLocation.Location.Z - LocalNavMeshCellHeight);
+
+	if (ValidTeleportLocation != Projected.Return) {
+		ValidTeleportLocation = Projected.Return;
+		TeleportRingRef->GetRootComponent()->SetVisibility(ValidTeleportLocation, true);
+	}
+
+	TeleportRingRef->SetActorLocation(ProjectedTeleportLocation);
+
+	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(Tracer, TEXT("User.PointsArray"), TeleportTracePathPositions);
+}
+
+FProjectedResult AVRPawn::IsValidTeleportLocation(FHitResult Hit) {
+	FProjectedResult Result = FProjectedResult();
+	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());;
+	Result.Return = NavSys->ProjectPointToNavigation(FVector(Hit.Location),Result.ProjectedLocation);
+	return Result;
 }
