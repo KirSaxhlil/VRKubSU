@@ -77,5 +77,7 @@ public:
 
 	void TeleportTrace(FVector Start, FVector ForwardVector);
 
+	void TryTeleport();
+
 	FProjectedResult IsValidTeleportLocation(FHitResult Hit);
 };

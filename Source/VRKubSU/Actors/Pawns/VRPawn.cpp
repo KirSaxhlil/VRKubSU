@@ -156,6 +156,19 @@ void AVRPawn::TeleportTrace(FVector Start, FVector ForwardVector) {
 	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(Tracer, TEXT("User.PointsArray"), TeleportTracePathPositions);
 }
 
+void AVRPawn::TryTeleport()
+{
+	if (ValidTeleportLocation) {
+		ValidTeleportLocation = false;
+		FVector TargetLocation = FVector(Camera->GetRelativeLocation().X,
+										 Camera->GetRelativeLocation().Y,
+										 0.f);
+		TargetLocation = ProjectedTeleportLocation - FRotator(0, 0, GetActorRotation().Yaw).RotateVector(TargetLocation);
+		FRotator TargetRotation = FRotator(0, 0, GetActorRotation().Yaw);
+		TeleportTo(TargetLocation, TargetRotation);
+	}
+}
+
 FProjectedResult AVRPawn::IsValidTeleportLocation(FHitResult Hit) {
 	FProjectedResult Result = FProjectedResult();
 	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());;
