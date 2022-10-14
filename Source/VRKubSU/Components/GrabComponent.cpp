@@ -8,8 +8,7 @@ UGrabComponent::UGrabComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
+	PrimaryComponentTick.bCanEverTick = false;
 	// ...
 }
 
@@ -18,9 +17,8 @@ UGrabComponent::UGrabComponent()
 void UGrabComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	
+	SetShouldSimulateOnDrop();
+	Cast<UPrimitiveComponent>(GetAttachParent())->SetCollisionProfileName("PhysicsActor", true);
 }
 
 
@@ -32,3 +30,8 @@ void UGrabComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	// ...
 }
 
+void UGrabComponent::SetShouldSimulateOnDrop() {
+	if (Cast<UPrimitiveComponent>(GetAttachParent())->IsAnySimulatingPhysics()) {
+		SimulateOnDrop = true;
+	}
+}
