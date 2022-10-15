@@ -30,8 +30,39 @@ void UGrabComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	// ...
 }
 
+bool UGrabComponent::TryGrab(UMotionControllerComponent* MotionController) {
+	SetPrimitiveComponentPhysics(false);
+	if (AttachParentToMotionController(MotionController)) {
+		MotionControllerRef = MotionController;
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 void UGrabComponent::SetShouldSimulateOnDrop() {
 	if (Cast<UPrimitiveComponent>(GetAttachParent())->IsAnySimulatingPhysics()) {
 		SimulateOnDrop = true;
 	}
+}
+
+void UGrabComponent::SetPrimitiveComponentPhysics(bool Simulate) {
+	UPrimitiveComponent* Comp = Cast<UPrimitiveComponent>(GetAttachParent());
+	if (IsValid(Comp)) {
+		Comp->SetSimulatePhysics(Simulate);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("GrabComponent->SetSimulatingParent->Cast to UPrimitiveComponent FAILED"))
+	}
+}
+
+bool UGrabComponent::AttachParentToMotionController(UMotionControllerComponent* MotionController) {
+	FAttachmentTransformRules AttachmentRules = FAttachmentTransformRules(EAttachmentRule::KeepWorld,
+																		  EAttachmentRule::KeepWorld,
+																		  EAttachmentRule::KeepWorld,
+																		  true);
+	bool AttachmentResult = GetAttachParent()->AttachToComponent(MotionController, AttachmentRules);
+	UE_CLOG( (!AttachmentResult), LogTemp, Warning, TEXT("Attaching %s to %s FAILED - Object is not grabbed."), *GetAttachParent()->GetName(), *MotionController->GetName())
+	return AttachmentResult;
 }

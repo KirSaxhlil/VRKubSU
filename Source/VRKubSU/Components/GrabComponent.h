@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+#include "MotionControllerComponent.h"
 #include "GrabComponent.generated.h"
+
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -22,8 +24,17 @@ protected:
 
 public:	
 	bool SimulateOnDrop;
+	UMotionControllerComponent* MotionControllerRef;
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void SetShouldSimulateOnDrop();
+
+	bool TryGrab(UMotionControllerComponent* MotionController);
+
+	bool TryRelease();
+
+	void SetPrimitiveComponentPhysics(bool Simulate);
+
+	bool AttachParentToMotionController(UMotionControllerComponent* MotionController);
 };
