@@ -41,6 +41,22 @@ bool UGrabComponent::TryGrab(UMotionControllerComponent* MotionController) {
 	}
 }
 
+bool UGrabComponent::TryRelease() {
+	if (SimulateOnDrop) {
+		SetPrimitiveComponentPhysics(true);
+		return true;
+	}
+	else {
+		GetAttachParent()->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, true));
+		if (Cast<UMotionControllerComponent>(GetAttachParent())) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+}
+
 void UGrabComponent::SetShouldSimulateOnDrop() {
 	if (Cast<UPrimitiveComponent>(GetAttachParent())->IsAnySimulatingPhysics()) {
 		SimulateOnDrop = true;
