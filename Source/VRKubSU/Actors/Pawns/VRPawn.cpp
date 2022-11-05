@@ -73,7 +73,8 @@ void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAxis("Turning", this, &AVRPawn::InputAxis_Turn);
 	PlayerInputComponent->BindAxis("Teleport", this, &AVRPawn::InputAxis_Teleport);
-	//PlayerInputComponent->BindAction("GrabLeft", EInputEvent::IE_Pressed, this, &AVRPawn::InputAction_GrabLeft_Pressed);
+	PlayerInputComponent->BindAction("GrabLeft", EInputEvent::IE_Pressed, this, &AVRPawn::InputAction_GrabLeft_Pressed);
+	PlayerInputComponent->BindAction("GrabLeft", EInputEvent::IE_Released, this, &AVRPawn::InputAction_GrabLeft_Released);
 }
 
 void AVRPawn::InputAxis_Turn(float AxisValue)
@@ -121,6 +122,14 @@ void AVRPawn::InputAction_GrabLeft_Pressed() {
 			if (HeldComponentLeft == HeldComponentRight) {
 				HeldComponentRight = NULL;
 			}
+		}
+	}
+}
+
+void AVRPawn::InputAction_GrabLeft_Released() {
+	if (IsValid(HeldComponentLeft)) {
+		if (HeldComponentLeft->TryRelease()) {
+			HeldComponentLeft = NULL;
 		}
 	}
 }
