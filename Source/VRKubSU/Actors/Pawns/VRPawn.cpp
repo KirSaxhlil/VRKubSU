@@ -75,6 +75,8 @@ void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("Teleport", this, &AVRPawn::InputAxis_Teleport);
 	PlayerInputComponent->BindAction("GrabLeft", EInputEvent::IE_Pressed, this, &AVRPawn::InputAction_GrabLeft_Pressed);
 	PlayerInputComponent->BindAction("GrabLeft", EInputEvent::IE_Released, this, &AVRPawn::InputAction_GrabLeft_Released);
+	PlayerInputComponent->BindAction("GrabRight", EInputEvent::IE_Pressed, this, &AVRPawn::InputAction_GrabRight_Pressed);
+	PlayerInputComponent->BindAction("GrabRight", EInputEvent::IE_Released, this, &AVRPawn::InputAction_GrabRight_Released);
 }
 
 void AVRPawn::InputAxis_Turn(float AxisValue)
@@ -130,6 +132,26 @@ void AVRPawn::InputAction_GrabLeft_Released() {
 	if (IsValid(HeldComponentLeft)) {
 		if (HeldComponentLeft->TryRelease()) {
 			HeldComponentLeft = NULL;
+		}
+	}
+}
+
+void AVRPawn::InputAction_GrabRight_Pressed() {
+	UGrabComponent* Component = GetGrabComponentNearMotionController(MC_Right);
+	if (IsValid(Component)) {
+		if (Component->TryGrab(MC_Right)) {
+			HeldComponentRight = Component;
+			if (HeldComponentLeft == HeldComponentRight) {
+				HeldComponentLeft = NULL;
+			}
+		}
+	}
+}
+
+void AVRPawn::InputAction_GrabRight_Released() {
+	if (IsValid(HeldComponentRight)) {
+		if (HeldComponentRight->TryRelease()) {
+			HeldComponentRight = NULL;
 		}
 	}
 }
