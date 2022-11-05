@@ -114,7 +114,15 @@ void AVRPawn::InputAxis_Teleport(float AxisValue)
 }
 
 void AVRPawn::InputAction_GrabLeft_Pressed() {
-	//GetGrab
+	UGrabComponent* Component = GetGrabComponentNearMotionController(MC_Left);
+	if (IsValid(Component)) {
+		if (Component->TryGrab(MC_Left)) {
+			HeldComponentLeft = Component;
+			if (HeldComponentLeft == HeldComponentRight) {
+				HeldComponentRight = NULL;
+			}
+		}
+	}
 }
 
 ////// FUNCTIONS //////

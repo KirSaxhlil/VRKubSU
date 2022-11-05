@@ -60,7 +60,7 @@ public:
 	TArray<FVector> TeleportTracePathPositions;
 	FVector ProjectedTeleportLocation;
 	UGrabComponent* HeldComponentLeft;
-	UGrabComponent* HeldCompoentnRight;
+	UGrabComponent* HeldComponentRight;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
