@@ -17,6 +17,7 @@
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"
 
 #include "VRKubSU/Actors/Pawns/TeleportRing.h"
+#include "VRKubSU/Components/GrabComponent.h"
 
 #include "VRPawn.generated.h"
 
@@ -58,6 +59,8 @@ public:
 	ATeleportRing* TeleportRingRef;
 	TArray<FVector> TeleportTracePathPositions;
 	FVector ProjectedTeleportLocation;
+	UGrabComponent* HeldComponentLeft;
+	UGrabComponent* HeldCompoentnRight;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -73,6 +76,11 @@ public:
 
 	void InputAxis_Teleport(float AxisValue);
 
+	void InputAction_GrabLeft_Pressed();
+	void InputAction_GrabLeft_Released();
+	void InputAction_GrabRight_Pressed();
+	void InputAction_GrabRight_Released();
+
 	void StartTeleportTrace();
 
 	void EndTeleportTrace();
@@ -80,6 +88,8 @@ public:
 	void TeleportTrace(FVector Start, FVector ForwardVector);
 
 	void TryTeleport();
+
+	UGrabComponent* GetGrabComponentNearMotionController(UMotionControllerComponent* MotionController);
 
 	FProjectedResult IsValidTeleportLocation(FHitResult Hit);
 };

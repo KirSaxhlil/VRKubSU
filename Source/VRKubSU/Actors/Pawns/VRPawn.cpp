@@ -73,6 +73,7 @@ void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAxis("Turning", this, &AVRPawn::InputAxis_Turn);
 	PlayerInputComponent->BindAxis("Teleport", this, &AVRPawn::InputAxis_Teleport);
+	//PlayerInputComponent->BindAction("GrabLeft", EInputEvent::IE_Pressed, this, &AVRPawn::InputAction_GrabLeft_Pressed);
 }
 
 void AVRPawn::InputAxis_Turn(float AxisValue)
@@ -110,6 +111,10 @@ void AVRPawn::InputAxis_Teleport(float AxisValue)
 			}
 		}
 	}
+}
+
+void AVRPawn::InputAction_GrabLeft_Pressed() {
+	//GetGrab
 }
 
 ////// FUNCTIONS //////
@@ -198,4 +203,28 @@ FProjectedResult AVRPawn::IsValidTeleportLocation(FHitResult Hit) {
 	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());;
 	Result.Return = NavSys->ProjectPointToNavigation(FVector(Hit.Location),Result.ProjectedLocation);
 	return Result;
+}
+
+UGrabComponent* AVRPawn::GetGrabComponentNearMotionController(UMotionControllerComponent* MotionController) {
+	float LocalNearestComponentDistance = MAX_FLT;
+	UGrabComponent* LocalNearestGrabComponent = NULL;
+	FVector LocalGripPosition = MotionController->GetComponentLocation();
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>();
+	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery4);
+	TArray<AActor*> IgnoredActors = TArray<AActor*>(); // <..., FDefaultAllocator>
+	FHitResult TraceResult;
+	if (UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), LocalGripPosition, LocalGripPosition, 6, ObjectTypes, false, IgnoredActors, EDrawDebugTrace::None, TraceResult, true, FLinearColor::Green, FLinearColor::Red, 0)) {
+		TArray<UActorComponent*> GrabComponents = TraceResult.GetActor()->GetComponentsByClass(TSubclassOf<UGrabComponent>());
+		if (GrabComponents.Num() > 0) {
+			for (UActorComponent* Component : GrabComponents) {
+				UGrabComponent* CurrentGrabComponent = Cast<UGrabComponent>(Component);
+				float CurrentVectorLength = (CurrentGrabComponent->GetComponentLocation() - LocalGripPosition).SquaredLength();
+				if (CurrentVectorLength <= LocalNearestComponentDistance) {
+					LocalNearestComponentDistance = CurrentVectorLength;
+					LocalNearestGrabComponent = CurrentGrabComponent;
+				}
+			}
+		}
+	}
+	return LocalNearestGrabComponent;
 }
