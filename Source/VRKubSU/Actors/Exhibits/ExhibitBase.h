@@ -32,7 +32,7 @@ public:
 
 	UExhibitDataAsset* Data;
 
-	void ShowInfo();
+	virtual void ShowInfo();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

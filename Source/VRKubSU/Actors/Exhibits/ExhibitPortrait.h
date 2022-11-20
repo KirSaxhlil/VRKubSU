@@ -14,4 +14,6 @@ class VRKUBSU_API AExhibitPortrait : public AExhibitBase
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void ShowInfo() override;
 };

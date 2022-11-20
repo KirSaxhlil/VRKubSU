@@ -24,6 +24,8 @@ AExhibitBase::AExhibitBase()
 
 	// Components setup
 	Mesh->SetStaticMesh(Data->Mesh);
+	// WidgetTitle text set
+	// WidgetMain text set
 }
 
 // Called when the game starts or when spawned
