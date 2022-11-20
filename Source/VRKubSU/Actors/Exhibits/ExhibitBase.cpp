@@ -9,6 +9,21 @@ AExhibitBase::AExhibitBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// Components creating
+	DefaultSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+	RootComponent = DefaultSceneRoot;
+
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	Mesh->SetupAttachment(RootComponent);
+
+	WidgetTitle = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetTitle"));
+	WidgetTitle->SetupAttachment(Mesh);
+
+	WidgetMain = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetMain"));
+	WidgetMain->SetupAttachment(Mesh);
+
+	// Components setup
+	Mesh->SetStaticMesh(Data->Mesh);
 }
 
 // Called when the game starts or when spawned

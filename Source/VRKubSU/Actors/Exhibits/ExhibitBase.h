@@ -4,6 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
+#include "Components/WidgetComponent.h"
+
+#include "VRKubSU/Data/ExhibitDataAsset.h"
+
 #include "ExhibitBase.generated.h"
 
 UCLASS()
@@ -20,6 +25,14 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	USceneComponent* DefaultSceneRoot;
+	UStaticMeshComponent* Mesh;
+	UWidgetComponent* WidgetTitle;
+	UWidgetComponent* WidgetMain;
+
+	UExhibitDataAsset* Data;
+
+	void ShowInfo();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
