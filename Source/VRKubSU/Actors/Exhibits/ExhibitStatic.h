@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "VRKubSU/Actors/Exhibits/ExhibitBase.h"
-#include "ExhibitPortrait.generated.h"
+#include "ExhibitStatic.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class VRKUBSU_API AExhibitPortrait : public AExhibitBase
+class VRKUBSU_API AExhibitStatic : public AExhibitBase
 {
 	GENERATED_BODY()
-	
 public:
-	AExhibitPortrait();
+	AExhibitStatic();
 	virtual void ShowInfo() override;
+	
 };
