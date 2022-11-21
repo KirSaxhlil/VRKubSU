@@ -5,7 +5,8 @@
 
 AExhibitStatic::AExhibitStatic()
 {
-
+	WidgetTitle->SetRelativeLocation(InfoPosition);
+	WidgetMain->SetRelativeLocation(InfoPosition - FVector(0, 0, 10));
 }
 
 void AExhibitStatic::ShowInfo() {

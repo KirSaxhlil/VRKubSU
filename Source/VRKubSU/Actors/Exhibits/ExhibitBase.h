@@ -30,6 +30,7 @@ public:
 	UWidgetComponent* WidgetTitle;
 	UWidgetComponent* WidgetMain;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UExhibitDataAsset* Data;
 
 	virtual void ShowInfo();

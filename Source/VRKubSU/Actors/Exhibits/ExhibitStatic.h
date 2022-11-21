@@ -15,6 +15,9 @@ class VRKUBSU_API AExhibitStatic : public AExhibitBase
 	GENERATED_BODY()
 public:
 	AExhibitStatic();
+
+	FVector InfoPosition;
+
 	virtual void ShowInfo() override;
 	
 };

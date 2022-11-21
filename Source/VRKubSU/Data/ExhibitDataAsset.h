@@ -16,6 +16,7 @@ class VRKUBSU_API UExhibitDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UStaticMesh* Mesh;
 	FText Name;
 	FText Description;
