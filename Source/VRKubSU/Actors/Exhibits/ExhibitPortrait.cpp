@@ -12,7 +12,7 @@ AExhibitPortrait::AExhibitPortrait() {
 	WidgetMain->SetRelativeLocation(BoundsMin);
 }
 
-void AExhibitPortrait::ShowInfo() {
-	// activate showing animation in widget
-	// starting audio
-}
+//void AExhibitPortrait::ShowInfo() {
+//	// activate showing animation in widget
+//	// starting audio
+//}

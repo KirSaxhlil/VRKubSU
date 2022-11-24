@@ -38,6 +38,6 @@ void AExhibitBase::Tick(float DeltaTime)
 
 }
 
-void AExhibitBase::ShowInfo() {
-
-}
+//void AExhibitBase::ShowInfo_Implementation() {
+//
+//}

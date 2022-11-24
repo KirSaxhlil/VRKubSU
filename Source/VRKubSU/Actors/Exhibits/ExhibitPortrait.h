@@ -16,5 +16,5 @@ class VRKUBSU_API AExhibitPortrait : public AExhibitBase
 	
 public:
 	AExhibitPortrait();
-	virtual void ShowInfo() override;
+	//virtual void ShowInfo() override;
 };

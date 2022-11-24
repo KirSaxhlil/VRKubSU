@@ -18,6 +18,6 @@ public:
 
 	FVector InfoPosition;
 
-	virtual void ShowInfo() override;
+	//virtual void ShowInfo() override;
 	
 };

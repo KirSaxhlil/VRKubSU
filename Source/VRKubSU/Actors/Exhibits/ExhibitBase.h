@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 
 #include "Components/WidgetComponent.h"
+#include "Blueprint/UserWidget.h"
 
 #include "VRKubSU/Data/ExhibitDataAsset.h"
 
@@ -26,14 +27,21 @@ protected:
 
 public:	
 	USceneComponent* DefaultSceneRoot;
-	UStaticMeshComponent* Mesh;
-	UWidgetComponent* WidgetTitle;
-	UWidgetComponent* WidgetMain;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* Mesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UWidgetComponent* WidgetTitle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UWidgetComponent* WidgetMain;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UExhibitDataAsset* Data;
 
-	virtual void ShowInfo();
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	/*virtual*/ void ShowInfo(EUMGSequencePlayMode::Type State);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

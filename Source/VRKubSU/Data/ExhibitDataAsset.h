@@ -18,7 +18,11 @@ class VRKUBSU_API UExhibitDataAsset : public UDataAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UStaticMesh* Mesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText Description;
 	// Image
 	// Audio

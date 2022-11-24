@@ -20,7 +20,7 @@ class VRKUBSU_API AExhibitCup : public AExhibitBase
 public:
 	AExhibitCup();
 
-	virtual void ShowInfo() override;
+	//virtual void ShowInfo() override;
 
 	void ReturnPosition();
 };
