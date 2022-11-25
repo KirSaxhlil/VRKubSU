@@ -18,6 +18,7 @@
 
 #include "VRKubSU/Actors/Pawns/TeleportRing.h"
 #include "VRKubSU/Components/GrabComponent.h"
+#include "VRKubSU/Actors/Exhibits/ExhibitBase.h"
 
 #include "VRPawn.generated.h"
 

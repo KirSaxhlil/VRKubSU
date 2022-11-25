@@ -124,6 +124,7 @@ void AVRPawn::InputAction_GrabLeft_Pressed() {
 			if (HeldComponentLeft == HeldComponentRight) {
 				HeldComponentRight = NULL;
 			}
+			Cast<AExhibitBase>(Component->GetOwner())->Grabbed(this, false);
 		}
 	}
 }
@@ -144,6 +145,7 @@ void AVRPawn::InputAction_GrabRight_Pressed() {
 			if (HeldComponentLeft == HeldComponentRight) {
 				HeldComponentLeft = NULL;
 			}
+			Cast<AExhibitBase>(Component->GetOwner())->Grabbed(this, true);
 		}
 	}
 }

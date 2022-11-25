@@ -13,6 +13,9 @@ class IInteractionInterface
 {
 	GENERATED_BODY()
 public:
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void Interact();
-	void Grabbed();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void Grabbed(AActor* Grabber, bool Side);
 };

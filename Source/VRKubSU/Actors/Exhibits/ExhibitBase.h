@@ -9,11 +9,12 @@
 #include "Blueprint/UserWidget.h"
 
 #include "VRKubSU/Data/ExhibitDataAsset.h"
+#include "VRKubSU/Interfaces/InteractionInterface.h"
 
 #include "ExhibitBase.generated.h"
 
 UCLASS()
-class VRKUBSU_API AExhibitBase : public AActor
+class VRKUBSU_API AExhibitBase : public AActor, public IInteractionInterface
 {
 	GENERATED_BODY()
 	
