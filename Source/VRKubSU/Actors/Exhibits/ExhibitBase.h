@@ -27,6 +27,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USceneComponent* DefaultSceneRoot;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -40,6 +41,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UExhibitDataAsset* Data;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector WidgetScale;
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	/*virtual*/ void ShowInfo(EUMGSequencePlayMode::Type State);

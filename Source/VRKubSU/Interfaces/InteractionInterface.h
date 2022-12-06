@@ -18,4 +18,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void Grabbed(AActor* Grabber, bool Side);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void Ungrabbed();
 };

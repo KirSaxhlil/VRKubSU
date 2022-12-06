@@ -32,6 +32,17 @@ void UGrabComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 bool UGrabComponent::TryGrab(UMotionControllerComponent* MotionController) {
 	SetPrimitiveComponentPhysics(false);
+	/*if (AttachParentToMotionController(MotionController)) {
+		IsHeld = true;
+	}
+	if (IsHeld) {
+		MotionControllerRef = MotionController;
+		return true;
+	}
+	else {
+		return false;
+	}*/
+
 	if (AttachParentToMotionController(MotionController)) {
 		MotionControllerRef = MotionController;
 		return true;

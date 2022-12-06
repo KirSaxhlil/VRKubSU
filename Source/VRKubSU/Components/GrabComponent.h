@@ -24,6 +24,7 @@ protected:
 
 public:	
 	bool SimulateOnDrop;
+	bool IsHeld;
 	UMotionControllerComponent* MotionControllerRef;
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

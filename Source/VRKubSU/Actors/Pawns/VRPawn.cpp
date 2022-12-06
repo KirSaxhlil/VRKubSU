@@ -8,7 +8,9 @@ AVRPawn::AVRPawn()
 	:
 	AxisDeadzone(0.7f),
 	SnapTurnAngle(-45.f),
-	ProjectedTeleportLocation(FVector(0,0,0))
+	ProjectedTeleportLocation(FVector(0,0,0)),
+	DoOnceTurn(false),
+	DoOnceTeleport(false)
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -82,15 +84,14 @@ void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AVRPawn::InputAxis_Turn(float AxisValue)
 {
 	if (Controller != NULL) {
-		bool DoOnce = false;
 		if (IsAxisGreaterThenDeadzone(AxisValue)) {
-			if (!DoOnce) {
-				DoOnce = true;
+			if (!DoOnceTurn) {
+				DoOnceTurn = true;
 				SnapTurn(AxisValue > 0.f);
 			}
 		}
 		else {
-			DoOnce = false;
+			DoOnceTurn = false;
 		}
 	}
 }
@@ -98,10 +99,9 @@ void AVRPawn::InputAxis_Turn(float AxisValue)
 void AVRPawn::InputAxis_Teleport(float AxisValue)
 {
 	if (Controller != NULL) {
-		bool DoOnce = false;
 		if (IsAxisGreaterThenDeadzone(AxisValue) && AxisValue > 0.f) {
-			if (!DoOnce) {
-				DoOnce = true;
+			if (!DoOnceTeleport) {
+				DoOnceTeleport = true;
 				StartTeleportTrace();
 			}
 			TeleportTrace(MC_Right->GetComponentLocation(), MC_Right->GetForwardVector());
@@ -110,21 +110,28 @@ void AVRPawn::InputAxis_Teleport(float AxisValue)
 			if (TeleportTracing) {
 				EndTeleportTrace();
 				TryTeleport();
-				DoOnce = false;
+				DoOnceTeleport = false;
 			}
 		}
 	}
 }
 
 void AVRPawn::InputAction_GrabLeft_Pressed() {
+	UE_LOG(LogTemp, Warning, TEXT("Grab is pressed"));
 	UGrabComponent* Component = GetGrabComponentNearMotionController(MC_Left);
 	if (IsValid(Component)) {
+		UE_LOG(LogTemp, Warning, TEXT("Found valid component"));
 		if (Component->TryGrab(MC_Left)) {
 			HeldComponentLeft = Component;
 			if (HeldComponentLeft == HeldComponentRight) {
 				HeldComponentRight = NULL;
 			}
-			Cast<AExhibitBase>(Component->GetOwner())->Grabbed(this, false);
+			UE_LOG(LogTemp, Warning, TEXT("Grabbed"));
+			IInteractionInterface* Obj = Cast<IInteractionInterface>(Component->GetOwner());
+			if (Obj) {
+				UE_LOG(LogTemp, Warning, TEXT("Grabbed Executed"));
+				Obj->Execute_Grabbed(Component->GetOwner(), this, false);
+			}
 		}
 	}
 }
@@ -132,6 +139,12 @@ void AVRPawn::InputAction_GrabLeft_Pressed() {
 void AVRPawn::InputAction_GrabLeft_Released() {
 	if (IsValid(HeldComponentLeft)) {
 		if (HeldComponentLeft->TryRelease()) {
+			
+			IInteractionInterface* Obj = Cast<IInteractionInterface>(HeldComponentLeft->GetOwner());
+			if (Obj) {
+				Obj->Execute_Ungrabbed(HeldComponentLeft->GetOwner());
+			}
+
 			HeldComponentLeft = NULL;
 		}
 	}
@@ -145,7 +158,11 @@ void AVRPawn::InputAction_GrabRight_Pressed() {
 			if (HeldComponentLeft == HeldComponentRight) {
 				HeldComponentLeft = NULL;
 			}
-			Cast<AExhibitBase>(Component->GetOwner())->Grabbed(this, true);
+			IInteractionInterface* Obj = Cast<IInteractionInterface>(Component->GetOwner());
+			if (Obj) {
+				UE_LOG(LogTemp, Warning, TEXT("Grabbed Executed"));
+				Obj->Execute_Grabbed(Component->GetOwner(), this, true);
+			}
 		}
 	}
 }
@@ -153,6 +170,12 @@ void AVRPawn::InputAction_GrabRight_Pressed() {
 void AVRPawn::InputAction_GrabRight_Released() {
 	if (IsValid(HeldComponentRight)) {
 		if (HeldComponentRight->TryRelease()) {
+
+			IInteractionInterface* Obj = Cast<IInteractionInterface>(HeldComponentRight->GetOwner());
+			if (Obj) {
+				Obj->Execute_Ungrabbed(HeldComponentRight->GetOwner());
+			}
+
 			HeldComponentRight = NULL;
 		}
 	}
@@ -165,11 +188,11 @@ bool AVRPawn::IsAxisGreaterThenDeadzone(float axis_value) {
 }
 
 void AVRPawn::SnapTurn(bool RightTurn) {
-	float LocalYawDelta = FMath::FloatSelect(FMath::Abs(SnapTurnAngle), SnapTurnAngle, RightTurn);
+	float LocalYawDelta = (RightTurn ? FMath::Abs(SnapTurnAngle) : SnapTurnAngle);//FMath::FloatSelect(FMath::Abs(SnapTurnAngle), SnapTurnAngle, RightTurn);
 	FVector LocalCameraPosition = Camera->GetComponentLocation();
 	FTransform LocalCameraRelativeTransform = Camera->GetRelativeTransform();
-	FTransform LocalNewTransform = FTransform(this->GetActorRotation().Add(0, 0, LocalYawDelta), this->GetActorLocation(), FVector(1, 1, 1));
-	AddActorWorldRotation(FRotator(0, 0, LocalYawDelta), false, NULL, ETeleportType::TeleportPhysics);
+	FTransform LocalNewTransform = FTransform(this->GetActorRotation().Add(0, LocalYawDelta, 0), this->GetActorLocation(), FVector(1, 1, 1));
+	AddActorWorldRotation(FRotator(0, LocalYawDelta, 0), false, NULL, ETeleportType::TeleportPhysics);
 	FVector NewLocation = (LocalCameraPosition - (LocalCameraRelativeTransform * LocalNewTransform).GetLocation()) + GetActorLocation();
 	SetActorLocation(NewLocation, false, NULL, ETeleportType::TeleportPhysics);
 }
@@ -193,18 +216,26 @@ void AVRPawn::EndTeleportTrace() {
 void AVRPawn::TeleportTrace(FVector Start, FVector ForwardVector) {
 	float LocalTeleportLaunchSpeed = 650.f;
 	float LocalNavMeshCellHeight = 8.f;
+	float LocalTeleportProjectileRadius = 3.6f;
 
 	FPredictProjectilePathParams PredictParams = FPredictProjectilePathParams();
 	PredictParams.StartLocation = Start;
 	PredictParams.LaunchVelocity = FVector(LocalTeleportLaunchSpeed) * ForwardVector;
+	PredictParams.bTraceWithCollision = true;
+	PredictParams.ProjectileRadius = LocalTeleportProjectileRadius;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>();
 	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery1);
 	PredictParams.ObjectTypes = ObjectTypes;
 	PredictParams.bTraceComplex = false;
+	PredictParams.SimFrequency = 15;
+	PredictParams.MaxSimTime = 2;
+	PredictParams.OverrideGravityZ = 0;
 
-
+	UE_LOG(LogTemp, Warning, TEXT("Pathing"));
 	FPredictProjectilePathResult PathResults;
-	UGameplayStatics::PredictProjectilePath(this, PredictParams, PathResults);
+	if (UGameplayStatics::PredictProjectilePath(this, PredictParams, PathResults)) {
+		UE_LOG(LogTemp, Warning, TEXT("Hit"));
+	}
 
 	TeleportTracePathPositions = TArray<FVector>();
 	TeleportTracePathPositions.Add(Start);
@@ -233,16 +264,19 @@ void AVRPawn::TryTeleport()
 		FVector TargetLocation = FVector(Camera->GetRelativeLocation().X,
 										 Camera->GetRelativeLocation().Y,
 										 0.f);
-		TargetLocation = ProjectedTeleportLocation - FRotator(0, 0, GetActorRotation().Yaw).RotateVector(TargetLocation);
-		FRotator TargetRotation = FRotator(0, 0, GetActorRotation().Yaw);
+		TargetLocation = ProjectedTeleportLocation - FRotator(0, GetActorRotation().Yaw, 0).RotateVector(TargetLocation);
+		FRotator TargetRotation = FRotator(0, GetActorRotation().Yaw, 0);
 		TeleportTo(TargetLocation, TargetRotation);
 	}
 }
 
 FProjectedResult AVRPawn::IsValidTeleportLocation(FHitResult Hit) {
 	FProjectedResult Result = FProjectedResult();
-	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());;
-	Result.Return = NavSys->ProjectPointToNavigation(FVector(Hit.Location),Result.ProjectedLocation);
+	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+	const FNavAgentProperties& AgentProps = GetNavAgentPropertiesRef();
+	Result.Return = NavSys->ProjectPointToNavigation(FVector(Hit.Location),Result.ProjectedLocation,FVector(0,0,0));
+	//Result.Return = GetWorld()->GetNavigationSystem()->ProjectPointToNavigation();
+	//Result.Return = NavSys->ProjectPointToNavigation(FVector(Hit.Location.X, Hit.Location.Y, Hit.Location.Z), Result.ProjectedLocation, FVector(0, 0, 0), &AgentProps);
 	return Result;
 }
 
@@ -255,7 +289,8 @@ UGrabComponent* AVRPawn::GetGrabComponentNearMotionController(UMotionControllerC
 	TArray<AActor*> IgnoredActors = TArray<AActor*>(); // <..., FDefaultAllocator>
 	FHitResult TraceResult;
 	if (UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), LocalGripPosition, LocalGripPosition, 6, ObjectTypes, false, IgnoredActors, EDrawDebugTrace::None, TraceResult, true, FLinearColor::Green, FLinearColor::Red, 0)) {
-		TArray<UActorComponent*> GrabComponents = TraceResult.GetActor()->GetComponentsByClass(TSubclassOf<UGrabComponent>());
+		//TArray<UActorComponent*> GrabComponents = TraceResult.GetActor()->GetComponentsByClass(TSubclassOf<UGrabComponent>());
+		TArray<UActorComponent*> GrabComponents = TraceResult.GetActor()->GetComponentsByClass(UGrabComponent::StaticClass());
 		if (GrabComponents.Num() > 0) {
 			for (UActorComponent* Component : GrabComponents) {
 				UGrabComponent* CurrentGrabComponent = Cast<UGrabComponent>(Component);

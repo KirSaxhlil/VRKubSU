@@ -19,6 +19,7 @@
 #include "VRKubSU/Actors/Pawns/TeleportRing.h"
 #include "VRKubSU/Components/GrabComponent.h"
 #include "VRKubSU/Actors/Exhibits/ExhibitBase.h"
+#include "VRKubSU/Interfaces/InteractionInterface.h"
 
 #include "VRPawn.generated.h"
 
@@ -44,12 +45,19 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USceneComponent* DefaultSceneRoot;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMotionControllerComponent* MC_Right;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMotionControllerComponent* MC_Left;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCameraComponent* Camera;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UWidgetInteractionComponent* WI_Right;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UWidgetInteractionComponent* WI_Left;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UNiagaraComponent* Tracer;
 
 
@@ -62,6 +70,9 @@ public:
 	FVector ProjectedTeleportLocation;
 	UGrabComponent* HeldComponentLeft;
 	UGrabComponent* HeldComponentRight;
+
+	bool DoOnceTurn;
+	bool DoOnceTeleport;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

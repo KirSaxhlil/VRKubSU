@@ -4,17 +4,19 @@
 #include "VRKubSU/Actors/Exhibits/ExhibitBase.h"
 
 // Sets default values
-AExhibitBase::AExhibitBase()
+AExhibitBase::AExhibitBase():
+	WidgetScale(FVector(1,1,1))
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	// Components setup
 	DefaultSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
-	RootComponent = DefaultSceneRoot;
+	DefaultSceneRoot->SetupAttachment(RootComponent);
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	Mesh->SetupAttachment(RootComponent);
+	Mesh->SetStaticMesh(ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("/Engine/BasicShapes/Cube.Cube")).Object);
+	Mesh->SetupAttachment(DefaultSceneRoot);
 
 	WidgetTitle = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetTitle"));
 	WidgetTitle->SetupAttachment(Mesh);
@@ -39,5 +41,9 @@ void AExhibitBase::Tick(float DeltaTime)
 }
 
 //void AExhibitBase::ShowInfo_Implementation() {
+//
+//}
+
+//void AExhibitBase::Grabbed(AActor* Grabber, bool Side) {
 //
 //}
