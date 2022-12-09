@@ -59,6 +59,10 @@ public:
 	UWidgetInteractionComponent* WI_Left;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UNiagaraComponent* Tracer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UNiagaraComponent* TriggerLeftTracer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UNiagaraComponent* TriggerRightTracer;
 
 
 	float AxisDeadzone;
@@ -74,6 +78,15 @@ public:
 	bool DoOnceTurn;
 	bool DoOnceTeleport;
 
+	bool DoOnceTriggerLeft;
+	bool DoOnceTriggerRight;
+
+	bool TriggerLeftTracing;
+	bool TriggerRightTracing;
+
+	AActor* TriggerLeftHit;
+	AActor* TriggerRightHit;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -85,8 +98,10 @@ public:
 	void SnapTurn(bool RightTurn);
 
 	void InputAxis_Turn(float AxisValue);
-
 	void InputAxis_Teleport(float AxisValue);
+
+	void InputAxis_TriggerLeft(float AxisValue);
+	void InputAxis_TriggerRight(float AxisValue);
 
 	void InputAction_GrabLeft_Pressed();
 	void InputAction_GrabLeft_Released();
@@ -94,12 +109,11 @@ public:
 	void InputAction_GrabRight_Released();
 
 	void StartTeleportTrace();
-
 	void EndTeleportTrace();
-
 	void TeleportTrace(FVector Start, FVector ForwardVector);
-
 	void TryTeleport();
+
+	void TriggerTrace(FVector Start, FVector ForwardVector, AActor* HitActorContainer, UNiagaraComponent* TracerComponent);
 
 	UGrabComponent* GetGrabComponentNearMotionController(UMotionControllerComponent* MotionController);
 

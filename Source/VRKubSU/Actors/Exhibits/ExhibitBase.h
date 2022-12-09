@@ -45,6 +45,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FVector WidgetScale;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool InfoShowed;
+
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	/*virtual*/ void ShowInfo(EUMGSequencePlayMode::Type State);
 

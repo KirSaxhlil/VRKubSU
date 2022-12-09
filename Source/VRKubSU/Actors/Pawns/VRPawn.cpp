@@ -45,6 +45,16 @@ AVRPawn::AVRPawn()
 	Tracer->SetAsset(ConstructorHelpers::FObjectFinder<UNiagaraSystem>(TEXT("/Game/Assets/VFX/NS_TeleportTrace.NS_TeleportTrace")).Object);
 	Tracer->SetVisibility(false);
 	Tracer->SetupAttachment(DefaultSceneRoot);
+
+	TriggerLeftTracer = CreateDefaultSubobject<UNiagaraComponent>(TEXT("TriggerLeftTracer"));
+	TriggerLeftTracer->SetAsset(ConstructorHelpers::FObjectFinder<UNiagaraSystem>(TEXT("/Game/Assets/VFX/NS_TeleportTrace.NS_TeleportTrace")).Object);
+	TriggerLeftTracer->SetVisibility(false);
+	TriggerLeftTracer->SetupAttachment(DefaultSceneRoot);
+
+	TriggerRightTracer = CreateDefaultSubobject<UNiagaraComponent>(TEXT("TriggerRightTracer"));
+	TriggerRightTracer->SetAsset(ConstructorHelpers::FObjectFinder<UNiagaraSystem>(TEXT("/Game/Assets/VFX/NS_TeleportTrace.NS_TeleportTrace")).Object);
+	TriggerRightTracer->SetVisibility(false);
+	TriggerRightTracer->SetupAttachment(DefaultSceneRoot);
 }
 
 ////// BASIC EVENTS //////
@@ -75,6 +85,8 @@ void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAxis("Turning", this, &AVRPawn::InputAxis_Turn);
 	PlayerInputComponent->BindAxis("Teleport", this, &AVRPawn::InputAxis_Teleport);
+	PlayerInputComponent->BindAxis("TriggerLeft", this, &AVRPawn::InputAxis_TriggerLeft);
+	PlayerInputComponent->BindAxis("TriggerRight", this, &AVRPawn::InputAxis_TriggerRight);
 	PlayerInputComponent->BindAction("GrabLeft", EInputEvent::IE_Pressed, this, &AVRPawn::InputAction_GrabLeft_Pressed);
 	PlayerInputComponent->BindAction("GrabLeft", EInputEvent::IE_Released, this, &AVRPawn::InputAction_GrabLeft_Released);
 	PlayerInputComponent->BindAction("GrabRight", EInputEvent::IE_Pressed, this, &AVRPawn::InputAction_GrabRight_Pressed);
@@ -111,6 +123,50 @@ void AVRPawn::InputAxis_Teleport(float AxisValue)
 				EndTeleportTrace();
 				TryTeleport();
 				DoOnceTeleport = false;
+			}
+		}
+	}
+}
+
+void AVRPawn::InputAxis_TriggerLeft(float AxisValue) {
+	if (Controller != NULL) {
+		if (IsAxisGreaterThenDeadzone(AxisValue) && AxisValue > 0.f) {
+			if (!DoOnceTriggerLeft) {
+				DoOnceTriggerLeft = true;
+				TriggerLeftTracing = true;
+				TriggerLeftTracer->SetVisibility(true);
+			}
+			TriggerTrace(MC_Left->GetComponentLocation(), MC_Left->GetForwardVector(), TriggerLeftHit, TriggerLeftTracer);
+		}
+		else {
+			if (TriggerLeftTracing) {
+				TriggerLeftTracing = false;
+				TriggerLeftTracer->SetVisibility(false);
+				if(TriggerLeftHit)
+					Cast<IInteractionInterface>(TriggerLeftHit)->Execute_Interact(TriggerLeftHit);
+				DoOnceTriggerLeft = false;
+			}
+		}
+	}
+}
+
+void AVRPawn::InputAxis_TriggerRight(float AxisValue) {
+	if (Controller != NULL) {
+		if (IsAxisGreaterThenDeadzone(AxisValue) && AxisValue > 0.f) {
+			if (!DoOnceTriggerRight) {
+				DoOnceTriggerRight = true;
+				TriggerRightTracing = true;
+				TriggerRightTracer->SetVisibility(true);
+			}
+			TriggerTrace(MC_Right->GetComponentLocation(), MC_Right->GetForwardVector(), TriggerRightHit, TriggerRightTracer);
+		}
+		else {
+			if (TriggerRightTracing) {
+				TriggerRightTracing = false;
+				TriggerRightTracer->SetVisibility(false);
+				if (TriggerRightHit)
+					Cast<IInteractionInterface>(TriggerRightHit)->Execute_Interact(TriggerRightHit);
+				DoOnceTriggerRight = false;
 			}
 		}
 	}
@@ -303,4 +359,31 @@ UGrabComponent* AVRPawn::GetGrabComponentNearMotionController(UMotionControllerC
 		}
 	}
 	return LocalNearestGrabComponent;
+}
+
+void AVRPawn::TriggerTrace(FVector Start, FVector ForwardVector, AActor* HitActorContainer, UNiagaraComponent* TracerComponent) {
+	FHitResult Hit;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>();
+	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery1);
+	FVector Destination = Start + (ForwardVector * 100.f);
+	if (GetWorld()->LineTraceSingleByObjectType(Hit, Start, Destination, ObjectTypes)) {
+		if (Cast<IInteractionInterface>(Hit.GetActor())) {
+			HitActorContainer = Hit.GetActor();
+		}
+		else {
+			HitActorContainer = NULL;
+		}
+	}
+	else {
+		HitActorContainer = NULL;
+	}
+
+	TArray<FVector> TracePoints = TArray<FVector>();
+	TracePoints.Add(Start);
+	if(Hit.Location != FVector(0,0,0))
+		TracePoints.Add(Hit.Location);
+	else
+		TracePoints.Add(Destination);
+
+	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(TracerComponent, TEXT("User.PointsArray"), TracePoints);
 }

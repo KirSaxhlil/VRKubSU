@@ -5,7 +5,8 @@
 
 // Sets default values
 AExhibitBase::AExhibitBase():
-	WidgetScale(FVector(1,1,1))
+	WidgetScale(FVector(1,1,1)),
+	InfoShowed(false)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
