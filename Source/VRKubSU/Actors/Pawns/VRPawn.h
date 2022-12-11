@@ -84,7 +84,9 @@ public:
 	bool TriggerLeftTracing;
 	bool TriggerRightTracing;
 
+	UPROPERTY(BlueprintReadOnly)
 	AActor* TriggerLeftHit;
+	UPROPERTY(BlueprintReadOnly)
 	AActor* TriggerRightHit;
 
 	// Called every frame
@@ -113,7 +115,7 @@ public:
 	void TeleportTrace(FVector Start, FVector ForwardVector);
 	void TryTeleport();
 
-	void TriggerTrace(FVector Start, FVector ForwardVector, AActor* HitActorContainer, UNiagaraComponent* TracerComponent);
+	void TriggerTrace(FVector Start, FVector ForwardVector, AActor*& HitActorContainer, UNiagaraComponent* TracerComponent);
 
 	UGrabComponent* GetGrabComponentNearMotionController(UMotionControllerComponent* MotionController);
 

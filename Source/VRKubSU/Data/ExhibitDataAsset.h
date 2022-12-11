@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class VRKUBSU_API UExhibitDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
@@ -24,7 +24,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText Description;
-	// Image
+	
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly)
+	UTexture* Image;
 	// Audio
 	
 };

@@ -164,8 +164,14 @@ void AVRPawn::InputAxis_TriggerRight(float AxisValue) {
 			if (TriggerRightTracing) {
 				TriggerRightTracing = false;
 				TriggerRightTracer->SetVisibility(false);
-				if (TriggerRightHit)
-					Cast<IInteractionInterface>(TriggerRightHit)->Execute_Interact(TriggerRightHit);
+				if (TriggerRightHit) {
+					IInteractionInterface* Obj = Cast<IInteractionInterface>(TriggerRightHit);
+					if (Obj) {
+						Obj->Execute_Interact(TriggerRightHit);
+						UE_LOG(LogTemp, Warning, TEXT("Interact executed"));
+					}
+				}
+				TriggerRightHit = NULL;
 				DoOnceTriggerRight = false;
 			}
 		}
@@ -361,16 +367,21 @@ UGrabComponent* AVRPawn::GetGrabComponentNearMotionController(UMotionControllerC
 	return LocalNearestGrabComponent;
 }
 
-void AVRPawn::TriggerTrace(FVector Start, FVector ForwardVector, AActor* HitActorContainer, UNiagaraComponent* TracerComponent) {
+void AVRPawn::TriggerTrace(FVector Start, FVector ForwardVector, AActor*& HitActorContainer, UNiagaraComponent* TracerComponent) {
 	FHitResult Hit;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>();
 	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery1);
 	FVector Destination = Start + (ForwardVector * 100.f);
-	if (GetWorld()->LineTraceSingleByObjectType(Hit, Start, Destination, ObjectTypes)) {
+	FCollisionQueryParams CollisionParams = FCollisionQueryParams();
+	CollisionParams.AddIgnoredActor(this);
+	if (GetWorld()->LineTraceSingleByObjectType(Hit, Start, Destination, ObjectTypes, CollisionParams)) {
+		UE_LOG(LogTemp, Warning, TEXT("Hitted some Actor. It is %s."), *GetDebugName(Hit.GetActor()));
 		if (Cast<IInteractionInterface>(Hit.GetActor())) {
+			UE_LOG(LogTemp, Warning, TEXT("Hitted necessary object."));
 			HitActorContainer = Hit.GetActor();
 		}
 		else {
+			UE_LOG(LogTemp, Warning, TEXT("Hitted unnecessary object."));
 			HitActorContainer = NULL;
 		}
 	}
