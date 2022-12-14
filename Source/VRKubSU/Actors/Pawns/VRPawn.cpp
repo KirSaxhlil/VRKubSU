@@ -10,7 +10,8 @@ AVRPawn::AVRPawn()
 	SnapTurnAngle(-45.f),
 	ProjectedTeleportLocation(FVector(0,0,0)),
 	DoOnceTurn(false),
-	DoOnceTeleport(false)
+	DoOnceTeleport(false),
+	InteractionDistance(200)
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -142,8 +143,11 @@ void AVRPawn::InputAxis_TriggerLeft(float AxisValue) {
 			if (TriggerLeftTracing) {
 				TriggerLeftTracing = false;
 				TriggerLeftTracer->SetVisibility(false);
-				if(TriggerLeftHit)
+				if (TriggerLeftHit) {
 					Cast<IInteractionInterface>(TriggerLeftHit)->Execute_Interact(TriggerLeftHit);
+					UE_LOG(LogTemp, Warning, TEXT("Left Interact executed"));
+				}
+				TriggerLeftHit = NULL;
 				DoOnceTriggerLeft = false;
 			}
 		}
@@ -165,11 +169,8 @@ void AVRPawn::InputAxis_TriggerRight(float AxisValue) {
 				TriggerRightTracing = false;
 				TriggerRightTracer->SetVisibility(false);
 				if (TriggerRightHit) {
-					IInteractionInterface* Obj = Cast<IInteractionInterface>(TriggerRightHit);
-					if (Obj) {
-						Obj->Execute_Interact(TriggerRightHit);
-						UE_LOG(LogTemp, Warning, TEXT("Interact executed"));
-					}
+					Cast<IInteractionInterface>(TriggerRightHit)->Execute_Interact(TriggerRightHit);
+					UE_LOG(LogTemp, Warning, TEXT("Right Interact executed"));
 				}
 				TriggerRightHit = NULL;
 				DoOnceTriggerRight = false;
@@ -179,7 +180,7 @@ void AVRPawn::InputAxis_TriggerRight(float AxisValue) {
 }
 
 void AVRPawn::InputAction_GrabLeft_Pressed() {
-	UE_LOG(LogTemp, Warning, TEXT("Grab is pressed"));
+	UE_LOG(LogTemp, Warning, TEXT("Left grab is pressed"));
 	UGrabComponent* Component = GetGrabComponentNearMotionController(MC_Left);
 	if (IsValid(Component)) {
 		UE_LOG(LogTemp, Warning, TEXT("Found valid component"));
@@ -188,11 +189,11 @@ void AVRPawn::InputAction_GrabLeft_Pressed() {
 			if (HeldComponentLeft == HeldComponentRight) {
 				HeldComponentRight = NULL;
 			}
-			UE_LOG(LogTemp, Warning, TEXT("Grabbed"));
+			UE_LOG(LogTemp, Warning, TEXT("Left grabbed"));
 			IInteractionInterface* Obj = Cast<IInteractionInterface>(Component->GetOwner());
 			if (Obj) {
-				UE_LOG(LogTemp, Warning, TEXT("Grabbed Executed"));
 				Obj->Execute_Grabbed(Component->GetOwner(), this, false);
+				UE_LOG(LogTemp, Warning, TEXT("Grabbed Executed"));
 			}
 		}
 	}
@@ -213,17 +214,20 @@ void AVRPawn::InputAction_GrabLeft_Released() {
 }
 
 void AVRPawn::InputAction_GrabRight_Pressed() {
+	UE_LOG(LogTemp, Warning, TEXT("Right grab is pressed"));
 	UGrabComponent* Component = GetGrabComponentNearMotionController(MC_Right);
 	if (IsValid(Component)) {
+		UE_LOG(LogTemp, Warning, TEXT("Found valid component"));
 		if (Component->TryGrab(MC_Right)) {
 			HeldComponentRight = Component;
 			if (HeldComponentLeft == HeldComponentRight) {
 				HeldComponentLeft = NULL;
 			}
+			UE_LOG(LogTemp, Warning, TEXT("Right grabbed"));
 			IInteractionInterface* Obj = Cast<IInteractionInterface>(Component->GetOwner());
 			if (Obj) {
-				UE_LOG(LogTemp, Warning, TEXT("Grabbed Executed"));
 				Obj->Execute_Grabbed(Component->GetOwner(), this, true);
+				UE_LOG(LogTemp, Warning, TEXT("Right grabbed Executed"));
 			}
 		}
 	}
@@ -250,7 +254,7 @@ bool AVRPawn::IsAxisGreaterThenDeadzone(float axis_value) {
 }
 
 void AVRPawn::SnapTurn(bool RightTurn) {
-	float LocalYawDelta = (RightTurn ? FMath::Abs(SnapTurnAngle) : SnapTurnAngle);//FMath::FloatSelect(FMath::Abs(SnapTurnAngle), SnapTurnAngle, RightTurn);
+	float LocalYawDelta = (RightTurn ? FMath::Abs(SnapTurnAngle) : SnapTurnAngle);
 	FVector LocalCameraPosition = Camera->GetComponentLocation();
 	FTransform LocalCameraRelativeTransform = Camera->GetRelativeTransform();
 	FTransform LocalNewTransform = FTransform(this->GetActorRotation().Add(0, LocalYawDelta, 0), this->GetActorLocation(), FVector(1, 1, 1));
@@ -337,8 +341,6 @@ FProjectedResult AVRPawn::IsValidTeleportLocation(FHitResult Hit) {
 	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
 	const FNavAgentProperties& AgentProps = GetNavAgentPropertiesRef();
 	Result.Return = NavSys->ProjectPointToNavigation(FVector(Hit.Location),Result.ProjectedLocation,FVector(0,0,0));
-	//Result.Return = GetWorld()->GetNavigationSystem()->ProjectPointToNavigation();
-	//Result.Return = NavSys->ProjectPointToNavigation(FVector(Hit.Location.X, Hit.Location.Y, Hit.Location.Z), Result.ProjectedLocation, FVector(0, 0, 0), &AgentProps);
 	return Result;
 }
 
@@ -350,8 +352,9 @@ UGrabComponent* AVRPawn::GetGrabComponentNearMotionController(UMotionControllerC
 	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery4);
 	TArray<AActor*> IgnoredActors = TArray<AActor*>(); // <..., FDefaultAllocator>
 	FHitResult TraceResult;
-	if (UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), LocalGripPosition, LocalGripPosition, 6, ObjectTypes, false, IgnoredActors, EDrawDebugTrace::None, TraceResult, true, FLinearColor::Green, FLinearColor::Red, 0)) {
-		//TArray<UActorComponent*> GrabComponents = TraceResult.GetActor()->GetComponentsByClass(TSubclassOf<UGrabComponent>());
+	if (UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), LocalGripPosition, LocalGripPosition, 6,
+														  ObjectTypes, false, IgnoredActors, EDrawDebugTrace::None,
+														  TraceResult, true, FLinearColor::Green, FLinearColor::Red, 0)) {
 		TArray<UActorComponent*> GrabComponents = TraceResult.GetActor()->GetComponentsByClass(UGrabComponent::StaticClass());
 		if (GrabComponents.Num() > 0) {
 			for (UActorComponent* Component : GrabComponents) {

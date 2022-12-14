@@ -40,11 +40,3 @@ void AExhibitBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
-
-//void AExhibitBase::ShowInfo_Implementation() {
-//
-//}
-
-//void AExhibitBase::Grabbed(AActor* Grabber, bool Side) {
-//
-//}

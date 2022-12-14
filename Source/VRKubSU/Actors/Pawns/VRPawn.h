@@ -41,39 +41,15 @@ public:
 	AVRPawn();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USceneComponent* DefaultSceneRoot;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UMotionControllerComponent* MC_Right;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UMotionControllerComponent* MC_Left;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCameraComponent* Camera;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UWidgetInteractionComponent* WI_Right;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UWidgetInteractionComponent* WI_Left;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UNiagaraComponent* Tracer;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UNiagaraComponent* TriggerLeftTracer;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UNiagaraComponent* TriggerRightTracer;
-
-
-	float AxisDeadzone;
-	float SnapTurnAngle;
+	UPROPERTY(BlueprintReadOnly, Category = "System|Teleporting")
 	bool TeleportTracing;
+	UPROPERTY(BlueprintReadOnly, Category = "System|Teleporting")
 	bool ValidTeleportLocation;
+	UPROPERTY(BlueprintReadOnly, Category = "System|Teleporting")
 	ATeleportRing* TeleportRingRef;
 	TArray<FVector> TeleportTracePathPositions;
+	UPROPERTY(BlueprintReadOnly, Category = "System|Teleporting")
 	FVector ProjectedTeleportLocation;
-	UGrabComponent* HeldComponentLeft;
-	UGrabComponent* HeldComponentRight;
 
 	bool DoOnceTurn;
 	bool DoOnceTeleport;
@@ -81,19 +57,18 @@ public:
 	bool DoOnceTriggerLeft;
 	bool DoOnceTriggerRight;
 
+	UPROPERTY(BlueprintReadOnly, Category = "System|Interacting")
 	bool TriggerLeftTracing;
+	UPROPERTY(BlueprintReadOnly, Category = "System|Interacting")
 	bool TriggerRightTracing;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "System|Interacting")
 	AActor* TriggerLeftHit;
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "System|Interacting")
 	AActor* TriggerRightHit;
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
 	bool IsAxisGreaterThenDeadzone(float axis_value);
 
@@ -117,7 +92,46 @@ public:
 
 	void TriggerTrace(FVector Start, FVector ForwardVector, AActor*& HitActorContainer, UNiagaraComponent* TracerComponent);
 
-	UGrabComponent* GetGrabComponentNearMotionController(UMotionControllerComponent* MotionController);
-
 	FProjectedResult IsValidTeleportLocation(FHitResult Hit);
+
+public:	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	USceneComponent* DefaultSceneRoot;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly , Category = "Components")
+	UMotionControllerComponent* MC_Right;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly , Category = "Components")
+	UMotionControllerComponent* MC_Left;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	UCameraComponent* Camera;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	UWidgetInteractionComponent* WI_Right;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	UWidgetInteractionComponent* WI_Left;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	UNiagaraComponent* Tracer;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	UNiagaraComponent* TriggerLeftTracer;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	UNiagaraComponent* TriggerRightTracer;
+
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Controls settings")
+	float AxisDeadzone;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Controls settings")
+	float SnapTurnAngle;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Controls settings")
+	float InteractionDistance;
+	
+	UPROPERTY(BlueprintReadOnly, Category = "System|Grabbing")
+	UGrabComponent* HeldComponentLeft;
+	UPROPERTY(BlueprintReadOnly, Category = "System|Grabbing")
+	UGrabComponent* HeldComponentRight;
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UGrabComponent* GetGrabComponentNearMotionController(UMotionControllerComponent* MotionController);
 };

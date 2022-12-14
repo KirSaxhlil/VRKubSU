@@ -19,23 +19,23 @@ public:
 	UGrabComponent();
 
 protected:
+	bool SimulateOnDrop;
+	bool IsHeld;
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
-	bool SimulateOnDrop;
-	bool IsHeld;
-	UMotionControllerComponent* MotionControllerRef;
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	void SetShouldSimulateOnDrop();
-
-	bool TryGrab(UMotionControllerComponent* MotionController);
-
-	bool TryRelease();
 
 	void SetPrimitiveComponentPhysics(bool Simulate);
 
 	bool AttachParentToMotionController(UMotionControllerComponent* MotionController);
+
+public:	
+	UMotionControllerComponent* MotionControllerRef;
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	bool TryGrab(UMotionControllerComponent* MotionController);
+
+	bool TryRelease();
 };

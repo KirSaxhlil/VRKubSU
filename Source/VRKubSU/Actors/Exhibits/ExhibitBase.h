@@ -23,33 +23,30 @@ public:
 	AExhibitBase();
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "System")
+	FVector WidgetScale;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	USceneComponent* DefaultSceneRoot;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	UStaticMeshComponent* Mesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	UWidgetComponent* WidgetTitle;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	UWidgetComponent* WidgetMain;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Defaults")
 	UExhibitDataAsset* Data;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FVector WidgetScale;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = "System")
 	bool InfoShowed;
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	/*virtual*/ void ShowInfo(EUMGSequencePlayMode::Type State);
+	void ShowInfo(EUMGSequencePlayMode::Type State);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

@@ -23,7 +23,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	USceneComponent* DefaultSceneRoot;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	UNiagaraComponent* NS_Ring;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
