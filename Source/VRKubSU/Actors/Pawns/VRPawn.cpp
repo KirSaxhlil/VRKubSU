@@ -22,38 +22,28 @@ AVRPawn::AVRPawn()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(DefaultSceneRoot);
 
-	MC_Right = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("M2C_Right"));
-	MC_Right->bDisplayDeviceModel = true;
-	MC_Right->MotionSource = "Right";
-	MC_Right->SetupAttachment(DefaultSceneRoot);
-
 	MC_Left = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("MC_Left"));
 	MC_Left->bDisplayDeviceModel = true;
 	MC_Left->MotionSource = "Left";
 	MC_Left->SetupAttachment(DefaultSceneRoot);
 
-	WI_Right = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WI_Right"));
-	WI_Right->PointerIndex = 1;
-	WI_Right->TraceChannel = ECollisionChannel::ECC_EngineTraceChannel1;
-	WI_Right->SetupAttachment(MC_Right);
-
-	WI_Left = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WI_Left"));
-	WI_Left->PointerIndex = 0;
-	WI_Left->TraceChannel = ECollisionChannel::ECC_EngineTraceChannel1;
-	WI_Left->SetupAttachment(MC_Left);
+	MC_Right = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("MC_Right"));
+	MC_Right->bDisplayDeviceModel = true;
+	MC_Right->MotionSource = "Right";
+	MC_Right->SetupAttachment(DefaultSceneRoot);
 
 	Tracer = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Tracer"));
-	Tracer->SetAsset(ConstructorHelpers::FObjectFinder<UNiagaraSystem>(TEXT("/Game/Assets/VFX/NS_TeleportTrace.NS_TeleportTrace")).Object);
+	Tracer->SetAsset(ConstructorHelpers::FObjectFinder<UNiagaraSystem>(TEXT("/Game/Assets/VFX/NS_BeamTrace.NS_BeamTrace")).Object);
 	Tracer->SetVisibility(false);
 	Tracer->SetupAttachment(DefaultSceneRoot);
 
 	TriggerLeftTracer = CreateDefaultSubobject<UNiagaraComponent>(TEXT("TriggerLeftTracer"));
-	TriggerLeftTracer->SetAsset(ConstructorHelpers::FObjectFinder<UNiagaraSystem>(TEXT("/Game/Assets/VFX/NS_TeleportTrace.NS_TeleportTrace")).Object);
+	TriggerLeftTracer->SetAsset(ConstructorHelpers::FObjectFinder<UNiagaraSystem>(TEXT("/Game/Assets/VFX/NS_BeamTrace.NS_BeamTrace")).Object);
 	TriggerLeftTracer->SetVisibility(false);
 	TriggerLeftTracer->SetupAttachment(DefaultSceneRoot);
 
 	TriggerRightTracer = CreateDefaultSubobject<UNiagaraComponent>(TEXT("TriggerRightTracer"));
-	TriggerRightTracer->SetAsset(ConstructorHelpers::FObjectFinder<UNiagaraSystem>(TEXT("/Game/Assets/VFX/NS_TeleportTrace.NS_TeleportTrace")).Object);
+	TriggerRightTracer->SetAsset(ConstructorHelpers::FObjectFinder<UNiagaraSystem>(TEXT("/Game/Assets/VFX/NS_BeamTrace.NS_BeamTrace")).Object);
 	TriggerRightTracer->SetVisibility(false);
 	TriggerRightTracer->SetupAttachment(DefaultSceneRoot);
 }
@@ -192,7 +182,7 @@ void AVRPawn::InputAction_GrabLeft_Pressed() {
 			UE_LOG(LogTemp, Warning, TEXT("Left grabbed"));
 			IInteractionInterface* Obj = Cast<IInteractionInterface>(Component->GetOwner());
 			if (Obj) {
-				Obj->Execute_Grabbed(Component->GetOwner(), this, false);
+				Obj->Execute_Grabbed(Component->GetOwner());
 				UE_LOG(LogTemp, Warning, TEXT("Grabbed Executed"));
 			}
 		}
@@ -226,7 +216,7 @@ void AVRPawn::InputAction_GrabRight_Pressed() {
 			UE_LOG(LogTemp, Warning, TEXT("Right grabbed"));
 			IInteractionInterface* Obj = Cast<IInteractionInterface>(Component->GetOwner());
 			if (Obj) {
-				Obj->Execute_Grabbed(Component->GetOwner(), this, true);
+				Obj->Execute_Grabbed(Component->GetOwner());
 				UE_LOG(LogTemp, Warning, TEXT("Right grabbed Executed"));
 			}
 		}
@@ -345,10 +335,14 @@ FProjectedResult AVRPawn::IsValidTeleportLocation(FHitResult Hit) {
 }
 
 UGrabComponent* AVRPawn::GetGrabComponentNearMotionController(UMotionControllerComponent* MotionController) {
+	UE_LOG(LogTemp, Warning, TEXT("Text 0"));
 	float LocalNearestComponentDistance = MAX_FLT;
 	UGrabComponent* LocalNearestGrabComponent = NULL;
+	UE_LOG(LogTemp, Warning, TEXT("Text 1"));
 	FVector LocalGripPosition = MotionController->GetComponentLocation();
+	UE_LOG(LogTemp, Warning, TEXT("Text 2"));
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>();
+	UE_LOG(LogTemp, Warning, TEXT("Text 3"));
 	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery4);
 	TArray<AActor*> IgnoredActors = TArray<AActor*>(); // <..., FDefaultAllocator>
 	FHitResult TraceResult;

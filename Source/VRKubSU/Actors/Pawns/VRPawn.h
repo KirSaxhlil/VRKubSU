@@ -18,7 +18,7 @@
 
 #include "VRKubSU/Actors/Pawns/TeleportRing.h"
 #include "VRKubSU/Components/GrabComponent.h"
-#include "VRKubSU/Actors/Exhibits/ExhibitBase.h"
+//#include "VRKubSU/Actors/Exhibits/ExhibitBase.h"
 #include "VRKubSU/Interfaces/InteractionInterface.h"
 
 #include "VRPawn.generated.h"
@@ -103,10 +103,6 @@ public:
 	UMotionControllerComponent* MC_Left;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* Camera;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-	UWidgetInteractionComponent* WI_Right;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-	UWidgetInteractionComponent* WI_Left;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	UNiagaraComponent* Tracer;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")

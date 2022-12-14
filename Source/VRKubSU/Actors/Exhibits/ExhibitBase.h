@@ -10,6 +10,7 @@
 
 #include "VRKubSU/Data/ExhibitDataAsset.h"
 #include "VRKubSU/Interfaces/InteractionInterface.h"
+#include "VRKubSU/Actors/Pawns/VRPawn.h"
 
 #include "ExhibitBase.generated.h"
 
@@ -47,6 +48,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void ShowInfo(EUMGSequencePlayMode::Type State);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetDistanceToCamera();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

@@ -7,9 +7,6 @@
 
 #include "ExhibitDataAsset.generated.h"
 
-/**
- * 
- */
 UCLASS(Blueprintable)
 class VRKUBSU_API UExhibitDataAsset : public UDataAsset
 {
@@ -27,6 +24,5 @@ public:
 	
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly)
 	UTexture* Image;
-	// Audio
 	
 };

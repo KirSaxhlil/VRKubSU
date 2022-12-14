@@ -40,3 +40,13 @@ void AExhibitBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
+float AExhibitBase::GetDistanceToCamera() {
+	AVRPawn* pawn = Cast<AVRPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(),0));
+	if (pawn) {
+		return FVector::Dist(Mesh->GetComponentLocation(), pawn->Camera->GetComponentLocation());
+	}
+	else {
+		return 0.0f;
+	}
+}

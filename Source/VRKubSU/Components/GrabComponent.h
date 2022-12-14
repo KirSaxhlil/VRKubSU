@@ -9,7 +9,7 @@
 
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable )
 class VRKUBSU_API UGrabComponent : public USceneComponent
 {
 	GENERATED_BODY()
@@ -20,7 +20,6 @@ public:
 
 protected:
 	bool SimulateOnDrop;
-	bool IsHeld;
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
@@ -31,6 +30,9 @@ protected:
 	bool AttachParentToMotionController(UMotionControllerComponent* MotionController);
 
 public:	
+	UPROPERTY(BlueprintReadOnly)
+	bool IsHeld;
+	UPROPERTY(BlueprintReadOnly)
 	UMotionControllerComponent* MotionControllerRef;
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -38,4 +40,7 @@ public:
 	bool TryGrab(UMotionControllerComponent* MotionController);
 
 	bool TryRelease();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	EControllerHand GetGrabbingHand();
 };

@@ -34,6 +34,7 @@ bool UGrabComponent::TryGrab(UMotionControllerComponent* MotionController) {
 
 	if (AttachParentToMotionController(MotionController)) {
 		MotionControllerRef = MotionController;
+		IsHeld = true;
 		return true;
 	}
 	else {
@@ -44,14 +45,19 @@ bool UGrabComponent::TryGrab(UMotionControllerComponent* MotionController) {
 bool UGrabComponent::TryRelease() {
 	if (SimulateOnDrop) {
 		SetPrimitiveComponentPhysics(true);
+		MotionControllerRef = NULL;
+		IsHeld = false;
 		return true;
 	}
 	else {
-		GetAttachParent()->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, true));
+		GetAttachParent()->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld,
+											   EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, true));
 		if (Cast<UMotionControllerComponent>(GetAttachParent())) {
 			return false;
 		}
 		else {
+			MotionControllerRef = NULL;
+			IsHeld = false;
 			return true;
 		}
 	}
@@ -81,4 +87,14 @@ bool UGrabComponent::AttachParentToMotionController(UMotionControllerComponent* 
 	bool AttachmentResult = GetAttachParent()->AttachToComponent(MotionController, AttachmentRules);
 	UE_CLOG( (!AttachmentResult), LogTemp, Warning, TEXT("Attaching %s to %s FAILED - Object is not grabbed."), *GetAttachParent()->GetName(), *MotionController->GetName())
 	return AttachmentResult;
+}
+
+EControllerHand UGrabComponent::GetGrabbingHand() {
+	if (IsValid(MotionControllerRef)) {
+		if (MotionControllerRef->MotionSource == TEXT("Left"))
+			return EControllerHand::Left;
+		else
+			return EControllerHand::Right;
+	}
+	return EControllerHand::AnyHand;
 }
